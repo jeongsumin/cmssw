@@ -22,7 +22,7 @@ public:
  void myBooker(DQMStore::IBooker & ) override;
 
 
- protected:
+protected:
   // void OccupancyDist();
   void fillGlobalME(RPCDetId & , MonitorElement *);
  
@@ -53,9 +53,11 @@ private:
   MonitorElement * NormOccupDDisk[10];
   
   MonitorElement * Barrel_OccBySt;
+  MonitorElement * Barrel_OccByRoll[6];
   MonitorElement * EndCap_OccByRng;
-  MonitorElement * EndCap_OccByDisk ;
-
+  MonitorElement * EndCap_OccByDisk;
+  MonitorElement * EndCap_OccByRollplus[4];
+  MonitorElement * EndCap_OccByRollminus[4];
 };
 
 #endif
