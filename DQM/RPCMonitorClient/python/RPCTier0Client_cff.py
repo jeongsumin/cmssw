@@ -12,7 +12,6 @@ from DQM.RPCMonitorClient.RPCRecHitProbabilityClient_cfi import *
 
 from  DQM.RPCMonitorClient.RPCChamberQuality_cfi import *
 
-                                   
 
 
 qTesterRPC = cms.EDAnalyzer("QualityTester",

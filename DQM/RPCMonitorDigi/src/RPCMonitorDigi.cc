@@ -21,7 +21,7 @@ RPCMonitorDigi::RPCMonitorDigi( const edm::ParameterSet& pset )
    numberOfInnerRings_(0){
 
   useMuonDigis_=  pset.getUntrackedParameter<bool>("UseMuon", true);
-  useRollInfo_=  pset.getUntrackedParameter<bool>("UseRollInfo", false);
+  useRollInfo_=  pset.getUntrackedParameter<bool>("UseRollInfo", true);
 
   muPtCut_  = pset.getUntrackedParameter<double>("MuonPtCut", 3.0); 
   muEtaCut_ = pset.getUntrackedParameter<double>("MuonEtaCut", 1.9); 

@@ -4,7 +4,7 @@ from DQMServices.Core.DQMEDAnalyzer import DQMEDAnalyzer
 rpcdigidqm = DQMEDAnalyzer('RPCMonitorDigi',
                             SaveRootFile = cms.untracked.bool(False),
                             RootFileName = cms.untracked.string('RPCMonitorDigi.root'),
-                            UseRollInfo =  cms.untracked.bool(False),
+                            UseRollInfo =  cms.untracked.bool(True),
                             UseMuon =  cms.untracked.bool(True),
                             MuonPtCut = cms.untracked.double(3.0),
                             MuonEtaCut= cms.untracked.double(1.9),

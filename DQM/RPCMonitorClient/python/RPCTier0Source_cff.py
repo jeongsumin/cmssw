@@ -10,8 +10,6 @@ from DQM.RPCMonitorClient.RPCFEDIntegrity_cfi import rpcFEDIntegrity
 from DQM.RPCMonitorClient.RPCMonitorRaw_cfi import *
 from DQM.RPCMonitorClient.RPCMonitorLinkSynchro_cfi import *
 
-# Efficiency
-
 # DQM Services
 from DQMServices.Core.DQMEDAnalyzer import DQMEDAnalyzer
 rpcEventInfo = DQMEDAnalyzer('DQMEventInfo',
