@@ -9,12 +9,12 @@
 #include <FWCore/ServiceRegistry/interface/Service.h>
 
 #include <DQMServices/Core/interface/DQMStore.h>
-#include <DQMServices/Core/interface/DQMOneEDAnalyzer.h>
+#include "DQMServices/Core/interface/DQMEDAnalyzer.h"
 
 ///Data Format
 #include "DataFormats/Scalers/interface/DcsStatus.h"
 
-class RPCDcsInfo : public DQMOneLumiEDAnalyzer<> {
+class RPCDcsInfo : public DQMEDAnalyzer {
 public:
   /// Constructor
   RPCDcsInfo(const edm::ParameterSet& ps);

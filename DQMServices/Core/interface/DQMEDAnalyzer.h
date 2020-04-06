@@ -93,6 +93,7 @@ public:
   void accumulate(edm::Event const& event, edm::EventSetup const& setup) final { analyze(event, setup); }
 
   void endLuminosityBlock(edm::LuminosityBlock const& lumi, edm::EventSetup const& setup) final {
+    dqmEndLuminosityBlock(lumi, setup);
     edm::Service<DQMStore>()->leaveLumi(lumi.run(), lumi.luminosityBlock(), meId());
   }
 
@@ -115,6 +116,7 @@ public:
   virtual void dqmBeginRun(edm::Run const&, edm::EventSetup const&) {}
   virtual void bookHistograms(DQMStore::IBooker&, edm::Run const&, edm::EventSetup const&) = 0;
   virtual void analyze(edm::Event const&, edm::EventSetup const&) {}
+  virtual void dqmEndLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) {}
 
 protected:
   edm::EDPutTokenT<DQMToken> runToken_;
