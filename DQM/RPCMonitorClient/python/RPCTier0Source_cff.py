@@ -18,8 +18,9 @@ rpcEventInfo = DQMEDAnalyzer('DQMEventInfo',
 )
 
 # DCS
-from DQM.RPCMonitorDigi.RPCDcsInfo_cfi import *
+#from DQM.RPCMonitorDigi.RPCDcsInfo_cfi import *
 
 
-rpcTier0Source = cms.Sequence(rpcdigidqm*rpcrechitprobability*rpcDcsInfo*rpcEventInfo*rpcFEDIntegrity)
+#rpcTier0Source = cms.Sequence(rpcdigidqm*rpcrechitprobability*rpcDcsInfo*rpcEventInfo*rpcFEDIntegrity)
+rpcTier0Source = cms.Sequence(rpcdigidqm*rpcrechitprobability*rpcEventInfo*rpcFEDIntegrity)
 

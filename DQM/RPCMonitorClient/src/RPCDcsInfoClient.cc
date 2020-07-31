@@ -3,6 +3,7 @@
 
 RPCDcsInfoClient::RPCDcsInfoClient(const edm::ParameterSet& ps) {
   dcsinfofolder_ = ps.getUntrackedParameter<std::string>("dcsInfoFolder", "RPC/DCSInfo");
+  dqmprovinfofolder_ = ps.getUntrackedParameter<std::string>("dqmProvInfoFolder", "Info/EventInfo");
 
   DCS.clear();
   DCS.resize(10);  // start with 10 LS, resize later
@@ -11,7 +12,7 @@ RPCDcsInfoClient::RPCDcsInfoClient(const edm::ParameterSet& ps) {
 RPCDcsInfoClient::~RPCDcsInfoClient() {}
 
 void RPCDcsInfoClient::beginJob() {}
-
+/*
 void RPCDcsInfoClient::dqmEndLuminosityBlock(DQMStore::IBooker& ibooker,
                                              DQMStore::IGetter& igetter,
                                              edm::LuminosityBlock const& l,
@@ -40,13 +41,49 @@ void RPCDcsInfoClient::dqmEndLuminosityBlock(DQMStore::IBooker& ibooker,
 
   return;
 }
-
+*/
 void RPCDcsInfoClient::dqmEndJob(DQMStore::IBooker& ibooker, DQMStore::IGetter& igetter) {
   // book
   ibooker.cd();
   ibooker.setCurrentFolder(dcsinfofolder_);
 
+  std::cout << dcsinfofolder_ << std::endl;
+
   unsigned int nlsmax = DCS.size();
+  MonitorElement* reportSummaryMap_ = igetter.get(dqmprovinfofolder_ + "/reportSummaryMap");
+
+  if (!reportSummaryMap_) {
+    std::cout << "!There are no report summary map in the Info directory!" << std::endl;
+    return;
+  }
+
+  //reportSummaryMap histogram: DCS HV Status and Beam Status per Lumisection
+  if (TH2F* h2 = reportSummaryMap_->getTH2F()) {
+    nlsmax = h2->GetNbinsX();
+    int hvStatus = -1; // Initialized as -1 follow by reportSummaryMap
+    const char * label_name = "RPC";
+    unsigned int rpc_num = 0;
+    if (nlsmax + 1 > DCS.size())
+      DCS.resize(nlsmax + 1);
+
+    for (int ybin = 0; ybin < h2->GetNbinsY(); ++ybin) {
+      std::cout << h2->GetYaxis()->GetBinLabel(ybin+1) << std::endl;
+      if (strcmp(h2->GetYaxis()->GetBinLabel(ybin+1), label_name) == 0)
+        rpc_num = ybin + 1;  
+    }
+
+    for (unsigned int nlumi = 0; nlumi < nlsmax; ++nlumi) {
+      //reportSummaryMap bins are filled -1(initialized), 0(no dcs bit), or 1(dcs bit)
+      int rpc_dcsbit = h2->GetBinContent(nlumi+1, rpc_num);
+      if (rpc_dcsbit == 0) {
+        hvStatus = 0;  // set to 0 because HV was off (!)
+      } else if (rpc_dcsbit == 1){
+        hvStatus = 1;  // set to 1 because HV was on (!)
+      } 
+      DCS[nlumi+1] = hvStatus;
+      hvStatus = -1;
+    }
+  }
 
   std::string meName = dcsinfofolder_ + "/rpcHVStatus";
   MonitorElement* rpcHVStatus = ibooker.book2D("rpcHVStatus", "RPC HV Status", nlsmax, 1., nlsmax + 1, 1, 0.5, 1.5);
