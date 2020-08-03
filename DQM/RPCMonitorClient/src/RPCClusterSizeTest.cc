@@ -53,6 +53,7 @@ void RPCClusterSizeTest::clientOperation() {
   MonitorElement* CLSD = nullptr;   // ClusterSize in 1 bin, Distribution
   MonitorElement* MEAN = nullptr;   // Mean ClusterSize, Roll vs Sector
   MonitorElement* MEAND = nullptr;  // Mean ClusterSize, Distribution
+  MonitorElement* HugeCLS = nullptr;// Huge Cluster Size allert, Roll vs Sector
 
   std::stringstream meName;
   RPCDetId detId;
@@ -69,6 +70,7 @@ void RPCClusterSizeTest::clientOperation() {
     if (detId.region() == 0) {
       CLS = CLSWheel[detId.ring() + 2];
       MEAN = MEANWheel[detId.ring() + 2];
+      HugeCLS = HugeCLSWheel[detId.ring() + 2];
       if (testMode_) {
         CLSD = CLSDWheel[detId.ring() + 2];
         MEAND = MEANDWheel[detId.ring() + 2];
@@ -78,6 +80,7 @@ void RPCClusterSizeTest::clientOperation() {
         if (detId.region() < 0) {
           CLS = CLSDisk[(detId.station() * detId.region()) + numberOfDisks_];
           MEAN = MEANDisk[(detId.station() * detId.region()) + numberOfDisks_];
+          HugeCLS = HugeCLSDisk[(detId.station() * detId.region()) + numberOfDisks_];
           if (testMode_) {
             CLSD = CLSDDisk[(detId.station() * detId.region()) + numberOfDisks_];
             MEAND = MEANDDisk[(detId.station() * detId.region()) + numberOfDisks_];
@@ -85,6 +88,7 @@ void RPCClusterSizeTest::clientOperation() {
         } else {
           CLS = CLSDisk[(detId.station() * detId.region()) + numberOfDisks_ - 1];
           MEAN = MEANDisk[(detId.station() * detId.region()) + numberOfDisks_ - 1];
+          HugeCLS = HugeCLSDisk[(detId.station() * detId.region()) + numberOfDisks_ -1];
           if (testMode_) {
             CLSD = CLSDDisk[(detId.station() * detId.region()) + numberOfDisks_ - 1];
             MEAND = MEANDDisk[(detId.station() * detId.region()) + numberOfDisks_ - 1];
@@ -113,6 +117,18 @@ void RPCClusterSizeTest::clientOperation() {
 
     float NormCLS = myMe->getBinContent(1) / myMe->getEntries();
     float meanCLS = myMe->getMean();
+    // There are no integral(binx1, binx2, option="") in the DQMServices/Core/interface/MonitorElement.h
+    float CLS1to3_Ratio = (myMe->getBinContent(1) + myMe->getBinContent(2) + myMe->getBinContent(3)) / myMe->integral();
+    float CLS4_Ratio = myMe->getBinContent(4) / myMe->integral();
+    float CLS5_Ratio = myMe->getBinContent(5) / myMe->integral();
+    //Standard Ratio needs to loop on the all Run by the filebase.
+    float CLS1to4_StdRatio_Barrel = 0.9;
+    float CLS5toAll_StdRatio_Barrel = 0.05;
+    float CLS6toAll_StdRatio_Barrel = 0.03;
+    float CLS1to3_StdRatio_EndCap = 0.95;
+    float CLS5toAll_StdRatio_EndCap = 0.04;
+    float CLS6toAll_StdRatio_EndCap = 0.02;
+    int H_CLS = 0; 
 
     if (CLS)
       CLS->setBinContent(xBin, yBin, NormCLS);
@@ -126,6 +142,34 @@ void RPCClusterSizeTest::clientOperation() {
         CLSD->Fill(NormCLS);
     }
 
+    //Barrel
+    if (detId.region() == 0) {
+      if ((CLS1to3_Ratio+CLS4_Ratio) >= CLS1to4_StdRatio_Barrel) {
+        //Standard of huge CLS >= 4
+        if ((1-(CLS1to3_Ratio + CLS4_Ratio)) >= CLS5toAll_StdRatio_Barrel) { H_CLS += 1; }
+      }
+      else {
+        //Standard of huge CLS >= 5
+        if ((1-(CLS1to3_Ratio + CLS4_Ratio + CLS5_Ratio)) >= CLS6toAll_StdRatio_Barrel) { H_CLS += 1; }
+      }
+    }
+    //EndCap
+    else {
+      if (((detId.station() * detId.region()) + numberOfDisks_) >= 0) {
+        if (CLS1to3_Ratio >= CLS1to3_StdRatio_EndCap) {
+          //Standard of huge CLS >= 4
+          if ((1-(CLS1to3_Ratio + CLS4_Ratio)) >= CLS5toAll_StdRatio_EndCap) { H_CLS += 1; }
+        }
+        else {
+          //Standard of huge CLS >= 5
+          if ((1-(CLS1to3_Ratio + CLS4_Ratio + CLS5_Ratio)) >= CLS6toAll_StdRatio_EndCap) { H_CLS += 1; }
+        }
+      }
+    }
+    
+    if (HugeCLS)
+      HugeCLS->setBinContent(xBin, yBin, H_CLS);
+
   }  //End loop on chambers
 }
 
@@ -134,11 +178,13 @@ void RPCClusterSizeTest::resetMEArrays(void) {
   memset((void*)CLSDWheel, 0, sizeof(MonitorElement*) * kWheels);
   memset((void*)MEANWheel, 0, sizeof(MonitorElement*) * kWheels);
   memset((void*)MEANDWheel, 0, sizeof(MonitorElement*) * kWheels);
+  memset((void*)HugeCLSWheel, 0, sizeof(MonitorElement*) * kWheels);
 
   memset((void*)CLSDisk, 0, sizeof(MonitorElement*) * kDisks);
   memset((void*)CLSDDisk, 0, sizeof(MonitorElement*) * kDisks);
   memset((void*)MEANDisk, 0, sizeof(MonitorElement*) * kDisks);
   memset((void*)MEANDDisk, 0, sizeof(MonitorElement*) * kDisks);
+  memset((void*)HugeCLSDisk, 0, sizeof(MonitorElement*) * kDisks);
 }
 
 void RPCClusterSizeTest::myBooker(DQMStore::IBooker& ibooker) {
@@ -165,6 +211,13 @@ void RPCClusterSizeTest::myBooker(DQMStore::IBooker& ibooker) {
 
     rpcUtils.labelXAxisSector(MEANWheel[w + 2]);
     rpcUtils.labelYAxisRoll(MEANWheel[w + 2], 0, w, useRollInfo_);
+
+    histoName.str("");
+    histoName << "HugeClusterSize_Roll_vs_Sector_Wheel" << w; //Huge Cluster Size allert (2D Roll vs Sector)
+    HugeCLSWheel[w + 2] = ibooker.book2D(histoName.str().c_str(), histoName.str().c_str(), 12, 0.5, 12.5, 21, 0.5, 21.5);
+
+    rpcUtils.labelXAxisSector(HugeCLSWheel[w + 2]);
+    rpcUtils.labelYAxisRoll(HugeCLSWheel[w + 2], 0, w, useRollInfo_);
 
     if (testMode_) {
       histoName.str("");
@@ -221,5 +274,18 @@ void RPCClusterSizeTest::myBooker(DQMStore::IBooker& ibooker) {
                                           3 * numberOfRings_ + 0.5);
     rpcUtils.labelXAxisSegment(MEANDisk[d + offset]);
     rpcUtils.labelYAxisRing(MEANDisk[d + offset], numberOfRings_, useRollInfo_);
+    
+    histoName.str("");
+    histoName << "HugeClusterSize_Roll_vs_Sector_Wheel" << d; //Huge Cluster Size allert (2D Roll vs Sector)
+    HugeCLSDisk[d + offset] = ibooker.book2D(histoName.str().c_str(),
+                                             histoName.str().c_str(),
+                                             36,
+                                             0.5,
+                                             36.5,
+                                             3 * numberOfRings_,
+                                             0.5,
+                                             3 * numberOfRings_ + 0.5);
+    rpcUtils.labelXAxisSegment(HugeCLSDisk[d + offset]);
+    rpcUtils.labelYAxisRing(HugeCLSDisk[d + offset], numberOfRings_, useRollInfo_);
   }
 }

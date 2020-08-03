@@ -31,11 +31,13 @@ private:
   MonitorElement *CLSDWheel[kWheels];   // ClusterSize in 1 bin, Distribution
   MonitorElement *MEANWheel[kWheels];   // Mean ClusterSize, Roll vs Sector
   MonitorElement *MEANDWheel[kWheels];  // Mean ClusterSize, Distribution
+  MonitorElement *HugeCLSWheel[kWheels];     // Huge Cluster Size allert, Roll vs Sector
 
   MonitorElement *CLSDisk[kDisks];    // ClusterSize in 1 bin, Roll vs Sector
   MonitorElement *CLSDDisk[kDisks];   // ClusterSize in 1 bin, Distribution
   MonitorElement *MEANDisk[kDisks];   // Mean ClusterSize, Roll vs Sector
   MonitorElement *MEANDDisk[kDisks];  // Mean ClusterSize, Distribution
+  MonitorElement *HugeCLSDisk[kDisks];     // Huge Cluster Size allert, Roll vs Sector
 
   void resetMEArrays(void);
 };

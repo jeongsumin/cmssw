@@ -14,7 +14,7 @@
 ///Data Format
 #include "DataFormats/Scalers/interface/DcsStatus.h"
 
-class RPCDcsInfo : public DQMOneLumiEDAnalyzer<> {
+class RPCDcsInfo : public DQMOneEDAnalyzer<> {
 public:
   /// Constructor
   RPCDcsInfo(const edm::ParameterSet& ps);
@@ -26,7 +26,7 @@ protected:
   /// Analyze
   void analyze(const edm::Event& e, const edm::EventSetup& c) override;
   void bookHistograms(DQMStore::IBooker&, edm::Run const&, edm::EventSetup const&) override;
-  void dqmEndLuminosityBlock(const edm::LuminosityBlock& l, const edm::EventSetup& c) override;
+  void dqmEndLuminosityBlock(const edm::LuminosityBlock& l, const edm::EventSetup& c);
 
 private:
   void makeDcsInfo(const edm::Event& e);
